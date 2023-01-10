@@ -1,8 +1,9 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(Rigidbody))]
+
 public class RunnerMovement : MonoBehaviour
 {
     private const string JumpAnimationName = "Jump"; 
@@ -13,7 +14,7 @@ public class RunnerMovement : MonoBehaviour
     [SerializeField] private float _jumpLength;
 
     private const float LaneOffset = 3;
-    private float laneChangeSpeed = 15;
+    private float laneChangeSpeed = 25;
     private Vector3 _targetPosition;
     private bool _isAbleToMove = true;
 
@@ -29,46 +30,38 @@ public class RunnerMovement : MonoBehaviour
     private void OnEnable()
     {
         _swipeListener.SwipeComplete += OnSwipeComplete;
+
+        _targetPosition = transform.position;
+        _rigidbody.isKinematic = true;
     }
 
     private void OnDisable()
-    {
+    { 
         _swipeListener.SwipeComplete -= OnSwipeComplete;
     }
 
-    private void Start()
-    {
-        _targetPosition = transform.position;        
-    }
     private void Update()
     {
-        _rigidbody.velocity = Vector3.zero;
-        _rigidbody.angularVelocity = Vector3.zero;
         transform.position = Vector3.MoveTowards(transform.position, _targetPosition, laneChangeSpeed * Time.deltaTime);
-    }
-
-    public void RestartPosition()
-    {
-        _targetPosition.x = 0;
     }
 
     private void OnSwipeComplete(Vector2 direction)
     {
-        if (_isAbleToMove)
+        if (!_isAbleToMove)
+            return;
+
+        if (direction == Vector2.up)
         {
-            if (direction == Vector2.up)
-            {
-                Jump();
-            }
-            else if (direction.x > 0 && transform.position.x != LaneOffset)
-            {
-                _targetPosition.x = GetTargetPosition(direction).x;
-            }
-            else if (direction.x < 0 && transform.position.x != -LaneOffset)
-            {
-                _targetPosition.x = GetTargetPosition(direction).x;
-            }
-        }       
+            Jump();
+        }
+        else if (direction.x > 0 && transform.position.x != LaneOffset)
+        {
+            _targetPosition.x = GetTargetPosition(direction).x;
+        }
+        else if (direction.x < 0 && transform.position.x != -LaneOffset)
+        {
+            _targetPosition.x = GetTargetPosition(direction).x;
+        }
     }
 
     private Vector3 GetTargetPosition(Vector2 direction)

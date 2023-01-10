@@ -9,172 +9,88 @@ using UnityEngine.Events;
 [RequireComponent(typeof(ActionMovement))]
 [RequireComponent(typeof(ActionAnimationController))]
 [RequireComponent (typeof(AttackHandler))]
+[RequireComponent(typeof(PlayerHealth))]
+[RequireComponent(typeof(PlayerCollectibles))]
+[RequireComponent(typeof(PlayerTargetHandler))]
+[RequireComponent(typeof(RollHandler))]
+[RequireComponent(typeof(SpellCast))]
 
 public class Player : MonoBehaviour
 {
     [SerializeField] GameController _gameController;
     [SerializeField] CameraHolder _camera;
 
-    private int _coins;
-    private int _mana;
-    private int _health;
-
-    public event UnityAction<int> HealthChanged;
-    public event UnityAction<int> ManaChanged;
     public event UnityAction DeadOnRunnerPhaze;
     public event UnityAction DeadOnActionPhaze;
 
-    private PlayerAnimationController _animationController;
-    private RunnerMovement _runnerMovement;
-    private SwipeListener _swipeListener;
-    private ActionMovement _actionMovement;
     private ActionAnimationController _actionAnimationController;  
+    private PlayerAnimationController _animationController;
+    private PlayerTargetHandler _targetHandler;
+    private PlayerCollectibles _collectibles;
+    private RunnerMovement _runnerMovement;
+    private ActionMovement _actionMovement;
+    private SwipeListener _swipeListener;
     private AttackHandler _attackHandler;
-
-    private List<GameObject> _targets;
-    private int _currentTargetIndex = 0;
-
-    private int _maxHealth = 100;
-    private int _maxMana = 100;
-
-    public int MaxHealth => _maxHealth;
-    public int MaxMana => _maxMana;
-
-
-    private Rigidbody _rg;
-    private void Awake()
-    {   
-        _rg = GetComponent<Rigidbody>();    
-        _actionMovement = GetComponent<ActionMovement>();
-        _animationController = GetComponent<PlayerAnimationController>();
-        _swipeListener = GetComponent<SwipeListener>();
-        _runnerMovement = GetComponent<RunnerMovement>();
-        _actionAnimationController = GetComponent<ActionAnimationController>();
-        _attackHandler = GetComponent<AttackHandler>();
-    }
-
-    private void Update()
-    {
-        Debug.Log("velocity" + _rg.angularVelocity);
-        Debug.Log("drag" + _rg.angularDrag);
-    }
+    private PlayerHealth _healthHandler;
+    private RollHandler _rollHandler;
+    private SpellCast _spellCast;
 
     private void OnEnable()
     {
-        _animationController.MovedToRunPosition += OnMovedToRunPosition;
-        _attackHandler.TargetDied += SetNewTarget;
+        _animationController = GetComponent<PlayerAnimationController>();
+        _animationController.MovedToRunPosition += SetRunnerControllersOn;
     }
 
     private void OnDisable()
     {
-        _animationController.MovedToRunPosition -= OnMovedToRunPosition;
-        _attackHandler.TargetDied -= SetNewTarget;
+        _animationController.MovedToRunPosition -= SetRunnerControllersOn;
     }
 
     private void Start()
-    {
-        _health = _maxHealth;
-        _mana = 0;
-    }
-
-    public void IncreaseCoinsCount()
-    {
-        _coins++;
-    }
-
-    public void ApplyDamage(int damage)
-    {
-        //Debug.Log("damage");
-
-        if(damage >= _health)
-        {
-            _health = 0;
-            SetDeath();
-        }
-        else
-        {
-            _health -= damage;
-        }
-        HealthChanged?.Invoke(_health);           
-    }
-
-    public void IncreaseMana(int mana)
     {   
-        if(_maxMana < (_mana + mana))
-        {
-            _mana = _maxMana;   
-        }
-        else
-        {
-            _mana += mana;
-        }
-        ManaChanged?.Invoke(_mana);
+        _rollHandler = GetComponent<RollHandler>();
+        _spellCast = GetComponent<SpellCast>();
+        _actionAnimationController = GetComponent<ActionAnimationController>();
+        _targetHandler = GetComponent<PlayerTargetHandler>();
+        _collectibles = GetComponent<PlayerCollectibles>();
+        _runnerMovement = GetComponent<RunnerMovement>();
+        _actionMovement = GetComponent<ActionMovement>();
+        _healthHandler = GetComponent<PlayerHealth>();
+        _swipeListener = GetComponent<SwipeListener>();
+        _attackHandler = GetComponent<AttackHandler>();
     }
 
     public void Restart()
     {
-        _health = _maxHealth;
-        HealthChanged?.Invoke(_health);
-
-        _mana = 0;
-        ManaChanged?.Invoke(_mana);
-
-        _animationController.PlayRestartAnimation();
-        _runnerMovement.RestartPosition();
-
+        SetRunnerControllersOff();
         SetActionControllersOff();
-        SetRunnerControllersOn();
+
+        _animationController.Restart();
+        _healthHandler.ResetHealth();
+        _collectibles.ResetMana();
     }
 
     public void SetToMainMenu()
     {
+        _animationController.MoveToMenuPosition();
+        _healthHandler.ResetHealth();
         SetRunnerControllersOff();
         SetActionControllersOff();
-        _animationController.MoveToMenuPosition();
-        _health = _maxHealth;
-        _mana = 0;
-        HealthChanged?.Invoke(_health);
-        ManaChanged?.Invoke(_mana);
+        _collectibles.ResetMana();
     }
 
     public void SetToActionPhaze(List<GameObject> enemyList)
     {
-        _targets = enemyList;
-        
+        GetComponentInChildren<CapsuleCollider>().isTrigger = false;
+        _targetHandler.SetTargetsList(enemyList);          
         SetRunnerControllersOff();
         SetActionControllersOn();
-        SetTarget();
-    }
+    } 
 
-    public void SetNewTarget()
-    {   
-        if(_currentTargetIndex == _targets.Count - 1)
-        {
-            for (int i = 0; i < _targets.Count; i++)
-            {
-                if (_targets[i].GetComponent<Enemy>().IsAlive  && _targets[i] != null)
-                {
-                    _currentTargetIndex = i;
-                    SetTarget();
-                    break;
-                }
-            }
-            return;
-        }
-
-        for (int i = 0; i < _targets.Count; i++)
-        {
-            if(i> _currentTargetIndex && _targets[i].GetComponent<Enemy>().IsAlive)
-            {
-                _currentTargetIndex = i;
-                break;
-            }
-        }       
-        SetTarget();
-    }
-
-    private void SetDeath()
+    public void SetDeath()
     {
+        GetComponentInChildren<CapsuleCollider>().isTrigger = true;
+
         if (_actionAnimationController.enabled)
         {
             DeadOnActionPhaze.Invoke();
@@ -188,28 +104,6 @@ public class Player : MonoBehaviour
             SetRunnerControllersOff();            
             _animationController.PlayDeathAnimation();
         }
-    }
-
-    private void SetTarget()
-    {
-        _camera.SetTarget(_targets[_currentTargetIndex].transform);
-        _actionAnimationController.SetTarget(_targets[_currentTargetIndex].transform);
-        _attackHandler.SetTarget(_targets[_currentTargetIndex].GetComponent<Enemy>());
-    }
-
-    public Enemy GetTarget(List<Enemy> targetList)
-    {   
-        Enemy target = null;
-
-        for (int i = 0; i < targetList.Count; i++)
-        {
-            if (targetList[i].IsAlive)
-            {
-                target =  targetList[i];
-            }
-        }
-
-        return target;
     }   
 
     public void StartRun()
@@ -217,34 +111,63 @@ public class Player : MonoBehaviour
         _animationController.StartRunPhazeAnimation();
     }
 
-    private void OnMovedToRunPosition()
-    {
-        SetRunnerControllersOn();
-    }
-
     private void SetRunnerControllersOn()
     {
-        _swipeListener.enabled = true;
-        _runnerMovement.enabled = true;
+        if (!_swipeListener.enabled)
+            _swipeListener.enabled = true;
+
+        if (!_runnerMovement.enabled)
+            _runnerMovement.enabled = true;
     }
 
     private void SetRunnerControllersOff()
     {
-        _swipeListener.enabled = false;
-        _runnerMovement.enabled = false;
+        if(_swipeListener.enabled)
+            _swipeListener.enabled = false;
+
+        if(_runnerMovement.enabled)
+            _runnerMovement.enabled = false;
     }
 
     private void SetActionControllersOn()
-    {
+    {   
         _animationController.SetActionAnimation();
-        _actionMovement.enabled = true;      
-        _attackHandler.enabled = true;
+
+        if (!_targetHandler.enabled)
+            _targetHandler.enabled = true;
+
+        if (!_actionMovement.enabled)
+            _actionMovement.enabled = true;    
+        
+        if(!_attackHandler.enabled)
+            _attackHandler.enabled = true;
+
+        if(!_rollHandler.enabled)
+            _rollHandler.enabled = true;
+
+        if (!_spellCast.enabled)
+            _spellCast.enabled = true;
+        
     }
 
     private void SetActionControllersOff()
-    {
-        _actionAnimationController.enabled = false;
-        _actionMovement.enabled = false;
-        _attackHandler.enabled = false;
+    {   
+        if( _actionAnimationController.enabled)
+            _actionAnimationController.enabled = false;
+
+        if( _actionMovement.enabled)
+            _actionMovement.enabled = false;
+
+        if( _attackHandler.enabled)
+            _attackHandler.enabled = false;
+
+        if (_rollHandler.enabled)
+            _rollHandler.enabled = false;
+
+        if (_spellCast.enabled)
+            _spellCast.enabled = false;
+
+        if (_targetHandler.enabled)
+            _targetHandler.enabled = false;
     }
 }

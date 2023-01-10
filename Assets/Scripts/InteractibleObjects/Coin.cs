@@ -8,7 +8,7 @@ public class Coin : InteractableObject
     {
         if (collider.TryGetComponent(out PlayerCollider playerCollider))
         {
-            collider.gameObject.GetComponentInParent<Player>().IncreaseCoinsCount();
+            collider.gameObject.GetComponentInParent<PlayerCollectibles>().IncreaseCoinsCount();
 
             gameObject.SetActive(false);
         }   

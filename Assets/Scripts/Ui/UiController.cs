@@ -14,9 +14,9 @@ public class UiController : MonoBehaviour
     [SerializeField] private PausePanel _pausePanel;
     [SerializeField] private Panel _actionPanel;
     [SerializeField] private Panel _losePanel;
-
+    [SerializeField] private LevelCompletePanel _levelCompletePanel;
+    [SerializeField] private LevelPanel _levelPanel;
     [SerializeField] private Player _player;
-
     public UnityAction LevelRestarted;
 
     private void OnEnable()
@@ -60,6 +60,23 @@ public class UiController : MonoBehaviour
     {
         if (!_inGamePanel.IsOnScreen)
             _inGamePanel.MoveToScreen();
+
+        if (_actionPanel.IsOnScreen)
+            _actionPanel.MoveFromScreen();
+    }
+
+    public void OnLevelComplete()
+    {
+        if (_inGamePanel.IsOnScreen)
+            _inGamePanel.MoveFromScreen();
+
+        if (_actionPanel.IsOnScreen)
+            _actionPanel.MoveFromScreen();
+
+        _levelCompletePanel.gameObject.SetActive(true);
+        _levelCompletePanel.MoveToScreen();
+        _levelCompletePanel.SetStars();
+        _levelPanel.SetInfo();
     }
 
     private void OnCameraSetToMainMenu()

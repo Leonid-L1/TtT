@@ -5,14 +5,14 @@ public class Enemy : MonoBehaviour
 {
     private static string DeathTrigger = "Death";
 
-    [SerializeField] private float _deathAnimationDuration = 2.4f;
+    //[SerializeField] private float _deathAnimationDuration = 2.4f;
 
     private Collider _collider;
     private StateMachine _stateMachine;
     private Stun _stunHandler;
     private Animator _animator;
 
-    private float _timeBeforeDestroy = 2;
+    //private float _timeBeforeDestroy = 2;
     private int _health = 100;
     private Player _target;
     private bool _isAlive = true;
@@ -37,6 +37,7 @@ public class Enemy : MonoBehaviour
     private void OnDisable()
     {
         _stunHandler.StunEnded -= TurnOnStateMachine;
+
         if(Target != null)
             _target.DeadOnActionPhaze -= OnPlayerDead;
     }
@@ -76,9 +77,10 @@ public class Enemy : MonoBehaviour
     {   
         _isAlive = false;
         _stateMachine.enabled = false;
+        StopAllCoroutines();
         _animator.SetTrigger(DeathTrigger);
         _collider.enabled = false;
-        Destroy(gameObject, _deathAnimationDuration + _timeBeforeDestroy);
+        //Destroy(gameObject, _deathAnimationDuration + _timeBeforeDestroy);
     }
 
     private void OnPlayerDead()

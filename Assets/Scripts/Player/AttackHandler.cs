@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
+[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(Player))]
 
 public class AttackHandler : MonoBehaviour
 {
@@ -22,17 +24,13 @@ public class AttackHandler : MonoBehaviour
 
     private Enemy _target;
     private List<AttackType> _attacks;
+    private Player _player;
     private Animator _animator;
     private float _elapsedTime;
     private bool _isWaitingForNextAttack = false;
     private bool _isAttacking = false;
 
     public bool IsAttacking => _isAttacking;
-
-    private void Awake()
-    {
-        _animator = GetComponent<Animator>();
-    }
 
     private void OnEnable()
     {
@@ -45,7 +43,10 @@ public class AttackHandler : MonoBehaviour
     }
 
     private void Start()
-    {
+    {   
+        _player = GetComponent<Player>();
+        _animator = GetComponent<Animator>();
+
         _attacks = new List<AttackType>()
         {
           new AttackType(FirstAttackTrigger, _attackDurations[0],_timeBeforeTouch[0], _damageValues[0]),
@@ -79,38 +80,32 @@ public class AttackHandler : MonoBehaviour
     }
 
     private void Attack()
-    {
-        if (_isAttacking == false)
+    {           
+        if (_isAttacking)
+            return;
+
+        if (_isWaitingForNextAttack == false)
         {
-            if (_isWaitingForNextAttack == false)
+            StartCoroutine(SetAttack(_attacks[0]));
+        }
+        else
+        {
+            if (_attacks[0].IsCompleted)
             {
+                _attacks[0].SetCompleteState(false);
+                StartCoroutine(SetAttack(_attacks[1]));
+            }
+            else if (_attacks[1].IsCompleted)
+            {
+                _attacks[1].SetCompleteState(false);
+                StartCoroutine(SetAttack(_attacks[2]));
+            }
+            else if (_attacks[2].IsCompleted)
+            {
+                _attacks[2].SetCompleteState(false);
                 StartCoroutine(SetAttack(_attacks[0]));
             }
-            else
-            {
-                if (_attacks[0].IsCompleted)
-                {
-                    _attacks[0].SetCompleteState(false);
-                    StartCoroutine(SetAttack(_attacks[1]));
-                }
-                else if (_attacks[1].IsCompleted)
-                {
-                    _attacks[1].SetCompleteState(false);
-                    StartCoroutine(SetAttack(_attacks[2]));
-                }
-                else if (_attacks[2].IsCompleted)
-                {
-                    _attacks[2].SetCompleteState(false);
-                    StartCoroutine(SetAttack(_attacks[0]));
-                }
-            }
         }
-    }
-
-    private float GetDistance()
-    {
-        float distance = Vector3.Distance(transform.position, _target.transform.position);
-        return distance;
     }
 
     private IEnumerator SetAttack(AttackType currentAttack)
@@ -144,6 +139,12 @@ public class AttackHandler : MonoBehaviour
         currentAttack.SetCompleteState(true);
 
         yield break;
+    }
+
+    private float GetDistance()
+    {
+        float distance = Vector3.Distance(transform.position, _target.transform.position);
+        return distance;
     }
 }
 

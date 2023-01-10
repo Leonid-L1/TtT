@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using UnityEngine.Events;
@@ -16,23 +15,20 @@ public class PlayerAnimationController : MonoBehaviour
     [SerializeField] private Transform _body;
 
     public UnityAction MovedToRunPosition;
-    public UnityAction MovedToMenuPosition;
 
-    private ActionAnimationController _acionAnimationController;
+    private ActionAnimationController _actionAnimationController;
     private Animator _animator;
 
     private Vector3 _runnerPosition = new Vector3(0, 0, -26);
-    private Vector3 _toMenuPosition = new Vector3(0, 0, -33.5f);
+    private Vector3 _menuPosition = new Vector3(0, 0, -33.5f);
     private Quaternion _toMenuRotation = Quaternion.Euler(new Vector3(0,90,0));
-
     private float _toRunnerPositionDuration = 1f;
-    private float _toMenuPositionDuration = 0.001f;
-
+    private float _delayBeforeStartRun = 0.25f;
     
     private void Start()
     {
         _animator = GetComponent<Animator>();
-        _acionAnimationController = GetComponent<ActionAnimationController>();
+        _actionAnimationController = GetComponent<ActionAnimationController>();
     }
 
     public void StartRunPhazeAnimation()
@@ -42,64 +38,41 @@ public class PlayerAnimationController : MonoBehaviour
 
     public void MoveToMenuPosition()
     {
-        StartCoroutine(DoMoveToMenuPosition());
+        _animator.Play(SitAnimation);
+        transform.rotation = _toMenuRotation;
+        transform.position = _menuPosition;
     }
 
-    public void PlayRestartAnimation()
+    public void Restart()
     {
-        StartCoroutine(DoRestartAnimation());
+        StartCoroutine(DoMoveToRunPosition());
     }
 
     public void SetActionAnimation()
-    {
-        _acionAnimationController.enabled = true;
+    {   
+        if(!_actionAnimationController.enabled)
+            _actionAnimationController.enabled = true;
+
         _animator.SetTrigger(ToActionTrigger);
-        GetComponentInChildren<CapsuleCollider>().isTrigger = false;
     }
 
     public void PlayDeathAnimation()
     {
-        GetComponentInChildren<CapsuleCollider>().isTrigger = true;
         _animator.SetTrigger(RunnerDeathTrigger);
     }
 
     private IEnumerator DoMoveToRunPosition()
     {
+        transform.position = _menuPosition;
         _animator.Play(RunAnimation);
         transform.rotation = Quaternion.Euler(Vector3.zero);
+        yield return new WaitForSeconds(_delayBeforeStartRun);      
+
         while (true)
         {
             transform.DOMove(_runnerPosition, _toRunnerPositionDuration);
             yield return new WaitForSeconds(_toRunnerPositionDuration);
             MovedToRunPosition?.Invoke();
-            yield break;
-        }
-    }
-
-    private IEnumerator DoMoveToMenuPosition()
-    {
-        _animator.Play(SitAnimation);
-        transform.rotation = _toMenuRotation;
-
-        while (true)
-        {
-            transform.DOMove(_toMenuPosition, _toMenuPositionDuration);
-            yield return new WaitForSeconds(_toMenuPositionDuration);
-            MovedToMenuPosition?.Invoke();
-            yield break;
-        }
-    }
-
-    private IEnumerator DoRestartAnimation()
-    {
-        while (true)
-        {
-            transform.DOMove(_toMenuPosition, _toMenuPositionDuration);
-            yield return new WaitForSeconds(_toMenuPositionDuration);
-
-            transform.DOMove(_runnerPosition, _toRunnerPositionDuration);
-            _animator.Play(RunAnimation);
-            transform.rotation = Quaternion.Euler(Vector3.zero);
             yield break;
         }
     }

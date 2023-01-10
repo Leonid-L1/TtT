@@ -9,7 +9,7 @@ public class Gem : InteractableObject
     {
         if (collider.TryGetComponent(out PlayerCollider playerCollider))
         {
-            collider.gameObject.GetComponentInParent<Player>().IncreaseMana(_manaCount);
+            collider.gameObject.GetComponentInParent<PlayerCollectibles>().IncreaseMana(_manaCount);
 
             gameObject.SetActive(false);
         }

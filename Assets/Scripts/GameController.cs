@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
+//using UnityEngine.Events;
+//using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
@@ -14,12 +15,17 @@ public class GameController : MonoBehaviour
     [SerializeField] private ArenaSecondTrigger _trigger;
 
     private LevelHandler _levelHandler;
+    private void Awake()
+    {
+        _levelHandler = GetComponent<LevelHandler>();
+    }
 
     private void OnEnable()
     {
         _camera.MovedToRunPosition += StartLevel;
         _player.DeadOnRunnerPhaze += DeathOnRunnerPhaze;
         _player.DeadOnActionPhaze += DeathOnActionPhaze;
+        _levelHandler.LevelComplete += OnLevelComplete;
     }
 
     private void OnDisable()
@@ -27,12 +33,8 @@ public class GameController : MonoBehaviour
         _camera.MovedToRunPosition -= StartLevel;
         _player.DeadOnRunnerPhaze -= DeathOnRunnerPhaze;
         _player.DeadOnActionPhaze -= DeathOnActionPhaze;
-    }
-
-    private void Start()
-    {
-        _levelHandler = GetComponent<LevelHandler>();    
-    }
+        _levelHandler.LevelComplete += OnLevelComplete;
+    } 
 
     private void StartLevel()
     {   
@@ -55,6 +57,8 @@ public class GameController : MonoBehaviour
         _interactableSpawner.SetSpawnCondition(true);
         _trigger.enabled = true;
         _trigger.ResetCondition();
+        //SceneManager.LoadScene(0);
+        
     }
 
     public void SetMainMenuFromGame()
@@ -86,6 +90,11 @@ public class GameController : MonoBehaviour
         {
             enemyList[i].GetComponent<Enemy>().SetTarget(_player);
         }
+    }
+
+    private void OnLevelComplete()
+    {
+        _uiController.OnLevelComplete();
     }
 
     private void DeathOnRunnerPhaze()

@@ -1,14 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.UI;
 
 [RequireComponent(typeof(AttackHandler))]
-[RequireComponent(typeof(ActionAnimationController))]
+[RequireComponent(typeof(RollHandler))]
+[RequireComponent(typeof(SpellCast))]
 
 public class ActionMovement : MonoBehaviour
-{   
+{
     [SerializeField] private MovementButtonHandler _upButton;
     [SerializeField] private MovementButtonHandler _downButton;
     [SerializeField] private MovementButtonHandler _leftButton;
@@ -17,9 +16,10 @@ public class ActionMovement : MonoBehaviour
     [SerializeField] private float _speed;
     [SerializeField] private float _interpolatingSpeed;
 
-    private ActionAnimationController _animationController;
     private AttackHandler _attackHandler;
+    private RollHandler _rollHandler;
     private Rigidbody _rigidbody;
+    private SpellCast _spellCast;
     private Vector3 _moveDirection;
     private float _horizontalInput;
     private float _verticalInput;
@@ -31,50 +31,54 @@ public class ActionMovement : MonoBehaviour
     public float Vertical => _verticalInput;
 
     private void Awake()
-    {
+    {   
+        _spellCast = GetComponent<SpellCast>();
         _rigidbody = GetComponent<Rigidbody>();
+        _rollHandler = GetComponent<RollHandler>();
         _attackHandler = GetComponent<AttackHandler>();
-        _animationController = GetComponent<ActionAnimationController>();
     }
 
     private void OnEnable()
     {   
-        _rigidbody.velocity = Vector3.zero;
+        if (_rigidbody.isKinematic)
+            _rigidbody.isKinematic = false;
+
         _attackHandler.Attacking += SetDelay;
-        _animationController.Rolling += SetDelay;
+        _rollHandler.Rolling += SetDelay;
+        _spellCast.SpellCasting += SetDelay;
     }
 
     private void OnDisable()
     {
         _attackHandler.Attacking -= SetDelay;
-        _animationController.Rolling -= SetDelay;
-        //_rigidbody.rotation = Quaternion.Euler(Vector3.zero);       
+        _rollHandler.Rolling -= SetDelay;
+        _spellCast.SpellCasting -= SetDelay;
     }
-    
+
     private void FixedUpdate()
     {
         if (_isAbleToMove == false)
             return;
 
-        if (_upButton.IsHold)
+        if (_upButton.IsHold || Input.GetKey(KeyCode.W))
         {
             _horizontalInput = 0;
             _verticalInput = InterpolateInput(_verticalInput, Vector3.forward.z);
             _isMoving = true;
         }
-        else if (_downButton.IsHold)
+        else if (_downButton.IsHold || Input.GetKey(KeyCode.S))
         {
             _horizontalInput = 0;
             _verticalInput = InterpolateInput(_verticalInput, Vector3.back.z);
             _isMoving = true;
         }
-        else if (_leftButton.IsHold)
+        else if (_leftButton.IsHold || Input.GetKey(KeyCode.A))
         {
             _verticalInput = 0;
             _horizontalInput = InterpolateInput(_horizontalInput, Vector3.left.x);
             _isMoving = true;
         }
-        else if (_rightButton.IsHold)
+        else if (_rightButton.IsHold || Input.GetKey(KeyCode.D))
         {
             _verticalInput = 0;
             _horizontalInput = InterpolateInput(_horizontalInput, Vector3.right.x);
@@ -88,6 +92,11 @@ public class ActionMovement : MonoBehaviour
         }
         Move();
     }
+    private float InterpolateInput(float input, float target)
+    {
+        float newAxis = Mathf.MoveTowards(input, target, _interpolatingSpeed * Time.deltaTime);
+        return newAxis;
+    }
 
     private void Move()
     {
@@ -95,13 +104,6 @@ public class ActionMovement : MonoBehaviour
         Vector3 velocity = _moveDirection * _speed;
 
         _rigidbody.velocity = velocity;
-    }
-
-    private float InterpolateInput(float input, float target)
-    {
-        float newAxis = Mathf.MoveTowards(input, target, _interpolatingSpeed * Time.deltaTime);
-
-        return newAxis;
     }
 
     private void SetDelay(float delay)

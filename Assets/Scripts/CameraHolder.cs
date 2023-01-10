@@ -39,8 +39,9 @@ public class CameraHolder : MonoBehaviour
     }
 
     private void OnDisable()
-    {
-        _player.GetComponent<Player>().DeadOnActionPhaze -= ClearTarget;
+    {   
+        if(_player != null)
+            _player.GetComponent<Player>().DeadOnActionPhaze -= ClearTarget;
     }
 
     public void SetTarget(Transform enemy)
@@ -49,8 +50,9 @@ public class CameraHolder : MonoBehaviour
     }
 
     public void ClearTarget()
-    {
-        _target = null;
+    {   
+        if(_target != null)
+            _target = null;
     }
 
     public void CalculateFirstPosition()

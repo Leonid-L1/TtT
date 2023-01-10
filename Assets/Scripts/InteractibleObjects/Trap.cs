@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Trap : InteractableObject
@@ -13,12 +12,10 @@ public class Trap : InteractableObject
     {
         if(collider.TryGetComponent(out PlayerCollider playerCollider))
         {
-            Debug.Log("trap touch");
-            collider.gameObject.GetComponentInParent<Player>().ApplyDamage(_damage);
+            collider.gameObject.GetComponentInParent<PlayerHealth>().ApplyDamage(_damage);
             StartCoroutine(DoAnimation());
         }
-    }  
-    
+    }    
 
     private IEnumerator DoAnimation()
     {

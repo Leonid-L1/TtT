@@ -9,19 +9,23 @@ using TMPro;
 
 public class LevelPanel : Panel
 {
-
     [SerializeField] private LevelHandler _levelHandler;
     [SerializeField] private Button _levelButton;
     [SerializeField] private Button _leftArrow;
     [SerializeField] private Button _rightArrow;
     [SerializeField] private TMP_Text _levelNumber;
 
-    public UnityAction LevelChosen;
+    [SerializeField] private List<Image> _stars;
+    [SerializeField] private Sprite _emptyStar;
+    [SerializeField] private Sprite _filledStar;
 
+    //public UnityAction LevelChosen;
+
+    private int _currentLevelResult;
     private int _currentLevel = 1;
 
     private void OnEnable()
-    {
+    {   
         _levelButton.onClick.AddListener(OnLevelButtonClick);
         _leftArrow.onClick.AddListener(OnLeftArrowClick);
         _rightArrow.onClick.AddListener(OnRightArrowClick);
@@ -36,12 +40,29 @@ public class LevelPanel : Panel
 
     private void Start()
     {
-        SetText();
+        SetInfo();
     }
-    
+
+    public void SetInfo()
+    {
+        foreach (Image star in _stars)
+            star.sprite = _emptyStar;
+
+        int maxStarsCount = 3;
+        _currentLevelResult = _levelHandler.GetResult(_currentLevel - 1);
+        int emptyStarsCount = maxStarsCount - _currentLevelResult;
+
+        _levelNumber.text = _currentLevel.ToString();
+
+        for (int i = 0; i < _currentLevelResult; i++)
+        {
+            _stars[i].sprite = _filledStar;
+        }
+    }
+
     private void OnLevelButtonClick()
     {
-        LevelChosen?.Invoke();
+        //LevelChosen?.Invoke();
         MoveFromScreen();
         _levelHandler.SetLevel(_currentLevel);
     }
@@ -51,21 +72,18 @@ public class LevelPanel : Panel
         if(_currentLevel != 1)
         {
             _currentLevel--;
-            SetText();
+            SetInfo();
         }
     }
 
     private void OnRightArrowClick()
     {
-        //if (_levelHandler.Levels[_currentLevel + 1].IsCompleted)
-        //{
-        //    _currentLevel++;
-        //    SetText();
-        //}
+        if (_levelHandler.Levels[_currentLevel - 1].IsCompleted)
+        {
+            _currentLevel++;
+            SetInfo();
+        }
     }
 
-    private void SetText()
-    {
-        _levelNumber.text = _currentLevel.ToString();
-    }
+    
 }

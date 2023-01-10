@@ -109,14 +109,14 @@ public class AttackState : State
 
         if(distance <= _distanceToAttack)
         {
-            Target.ApplyDamage(_firstAttackDamage);
+            Target.GetComponent<PlayerHealth>().ApplyDamage(_firstAttackDamage);
         }
         yield return new WaitForSeconds(_delayBeforeSecondAttack);
         distance = GetDistance();
 
         if (distance <= _distanceToAttack)
         {
-            Target.ApplyDamage(_secondAttackDamage);
+            Target.GetComponent<PlayerHealth>().ApplyDamage(_secondAttackDamage);
         }
         yield return new WaitForSeconds(_attackDuration - _delayBeforeFirstAttack - _delayBeforeSecondAttack);
 
