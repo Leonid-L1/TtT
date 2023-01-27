@@ -12,10 +12,10 @@ public class LevelHandler : MonoBehaviour
 
     private Level _currentLevel;
     private int _aliveEnemiesCount;
-    //private List<Enemy> _enemies;
     private float _coefficientTo3Stars = 1;
     private float _coefficientTo2Stars = 0.66f;
     private float _coefficientTo1Star = 0.33f;
+
     public List<Level> Levels => _levels;
 
     public event UnityAction<int> LevelComplete;
@@ -29,17 +29,16 @@ public class LevelHandler : MonoBehaviour
 
     public void SetLevel(int levelNumber)
     {   
-        List<Enemy> enemies = new List<Enemy>();
         int levelIndex = levelNumber - 1;
+
         _forestSpawnController.SetDuration(_levels[levelIndex].RunnerPhazeDuration);
-        enemies = _arena.SpawnEnemies(_enemyPrefab, _levels[levelIndex].EnemiesCount);
+        _arena.SpawnEnemies(_enemyPrefab, _levels[levelIndex].EnemiesCount);
 
-
-        foreach (var enemy in enemies)
+        foreach (var enemy in _arena.GetEnemies())
             enemy.EnemyDied += CalculateAliveEnemies;
 
         _currentLevel = _levels[levelIndex];
-        _aliveEnemiesCount = enemies.Count;
+        _aliveEnemiesCount = _arena.EnemiesCount;
     }
 
     public void Restart()
@@ -47,8 +46,11 @@ public class LevelHandler : MonoBehaviour
         _arena.Clear();
 
         _forestSpawnController.SetDuration(_currentLevel.RunnerPhazeDuration);
-
         _arena.SpawnEnemies(_enemyPrefab, _currentLevel.EnemiesCount);
+
+        foreach (var enemy in _arena.GetEnemies())
+            enemy.EnemyDied += CalculateAliveEnemies;
+
         _aliveEnemiesCount = _arena.EnemiesCount;
     }
 

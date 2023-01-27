@@ -21,7 +21,7 @@ public class LevelPanel : Panel
     private int _currentLevel = 1;
 
     private void OnEnable()
-    {   
+    {
         _levelButton.onClick.AddListener(OnLevelButtonClick);
         _leftArrow.onClick.AddListener(OnLeftArrowClick);
         _rightArrow.onClick.AddListener(OnRightArrowClick);
@@ -34,26 +34,26 @@ public class LevelPanel : Panel
         _rightArrow.onClick.RemoveListener(OnRightArrowClick);
     }
 
-    private void Start()
+    public override void MoveToScreen()
     {
+        base.MoveToScreen();
         SetInfo();
     }
 
     public void SetInfo()
     {
+        int maxStarsCount = 3;
+
         foreach (Image star in _stars)
             star.sprite = _emptyStar;
 
-        int maxStarsCount = 3;
         _currentLevelResult = _levelHandler.GetResult(_currentLevel - 1);
         int emptyStarsCount = maxStarsCount - _currentLevelResult;
 
         _levelNumber.text = _currentLevel.ToString();
 
         for (int i = 0; i < _currentLevelResult; i++)
-        {
             _stars[i].sprite = _filledStar;
-        }
     }
 
     private void OnLevelButtonClick()

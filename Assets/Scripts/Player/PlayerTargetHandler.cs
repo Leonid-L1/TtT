@@ -35,12 +35,14 @@ public class PlayerTargetHandler : MonoBehaviour
 
     public void SetTargetsList(List<Enemy> enemyList)
     {
-        _targets = enemyList;
+        _targets = new List<Enemy>();
 
-        foreach(var target in _targets)
-        {
+        for (int i = 0; i < enemyList.Count; i++)
+            _targets.Add(enemyList[i]);
+
+        foreach (var target in _targets)
             target.EnemyDied += OnEnemyDied;
-        }
+
         _targets[_currentTargetIndex].SetAsActiveTarget(true);
     }
 
@@ -56,7 +58,7 @@ public class PlayerTargetHandler : MonoBehaviour
             return;
         }
         
-        _targets[_currentTargetIndex].SetAsActiveTarget(false); //мне нужно что бы после смерти его выключало?
+        _targets[_currentTargetIndex].SetAsActiveTarget(false);
         _currentTargetIndex++;
 
         if (_currentTargetIndex == _targets.Count)
@@ -95,6 +97,8 @@ public class PlayerTargetHandler : MonoBehaviour
             SetNewTarget();
 
         enemy.EnemyDied -= OnEnemyDied;
+
+
     }
 }
     

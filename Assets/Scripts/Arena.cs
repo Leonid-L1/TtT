@@ -22,14 +22,8 @@ public class Arena : MonoBehaviour
 
     public void Clear()
     {
-        Debug.Log("arena clear");
-        Debug.Log(_enemies.Count);
         foreach (var enemy in _enemies)
-        {
             Destroy(enemy.gameObject);
-            
-            Debug.Log("enemy destroyed = " + enemy == null);
-        }          
 
         _enemies.Clear();
     }
