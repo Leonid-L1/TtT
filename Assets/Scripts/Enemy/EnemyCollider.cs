@@ -1,4 +1,7 @@
 using UnityEngine;
 
-public class EnemyCollider : MonoBehaviour { }
+public class EnemyCollider : MonoBehaviour
+{
+    
+}
 

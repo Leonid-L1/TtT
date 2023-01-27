@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
+
 [RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(Player))]
+[RequireComponent(typeof(PlayerWeapon))]
 
 public class AttackHandler : MonoBehaviour
 {
@@ -12,19 +13,18 @@ public class AttackHandler : MonoBehaviour
     private const string SecondAttackTrigger = "Second";
     private const string ThirdAttackTrigger = "Third";
 
+    [SerializeField] private PlayerWeaponCollider _weaponCollider;
     [SerializeField] private Button _attackButton;
     [SerializeField] private float _timeBetweenAttacks = 1.5f;
     [SerializeField] private List<float> _attackDurations;
-    [SerializeField] private List<int> _damageValues;
     [SerializeField] private List<float> _timeBeforeTouch;
     [SerializeField] private float _distanceToAttack;
 
     public event UnityAction<float> Attacking;
-    public event UnityAction TargetDied;
 
-    private Enemy _target;
     private List<AttackType> _attacks;
-    private Player _player;
+    private EnemyHealth _target;
+    private PlayerWeapon _weaponHandler;
     private Animator _animator;
     private float _elapsedTime;
     private bool _isWaitingForNextAttack = false;
@@ -35,23 +35,25 @@ public class AttackHandler : MonoBehaviour
     private void OnEnable()
     {
         _attackButton.onClick.AddListener(Attack);
+        _weaponCollider.EnemyTouched += DealDamage;
     }
 
     private void OnDisable()
     {
         _attackButton.onClick.RemoveListener(Attack);
+        _weaponCollider.EnemyTouched -= DealDamage;
     }
 
     private void Start()
     {   
-        _player = GetComponent<Player>();
+        _weaponHandler = GetComponent<PlayerWeapon>();
         _animator = GetComponent<Animator>();
 
         _attacks = new List<AttackType>()
         {
-          new AttackType(FirstAttackTrigger, _attackDurations[0],_timeBeforeTouch[0], _damageValues[0]),
-          new AttackType(SecondAttackTrigger, _attackDurations[1],_timeBeforeTouch[1], _damageValues[1]),
-          new AttackType(ThirdAttackTrigger,  _attackDurations[2],_timeBeforeTouch[2], _damageValues[2])
+          new AttackType(FirstAttackTrigger, _attackDurations[0],_timeBeforeTouch[0]),
+          new AttackType(SecondAttackTrigger, _attackDurations[1],_timeBeforeTouch[1]),
+          new AttackType(ThirdAttackTrigger,  _attackDurations[2],_timeBeforeTouch[2])
         };
     }
 
@@ -74,9 +76,24 @@ public class AttackHandler : MonoBehaviour
         }
     }
 
-    public void SetTarget(Enemy target)
+    public void SetTarget(EnemyHealth target)
     {
         _target = target;
+    }
+
+    public void SetWeaponColliderAsActive()
+    {
+        _weaponCollider.gameObject.SetActive(true);
+    }
+
+    public void SetWeaponColliderAsInactive()
+    {
+        _weaponCollider.gameObject.SetActive(false);
+    }
+
+    private void DealDamage(EnemyHealth enemy)
+    {
+        enemy.ApplyDamage(_weaponHandler.CurrentWeaponDamage);
     }
 
     private void Attack()
@@ -118,33 +135,13 @@ public class AttackHandler : MonoBehaviour
 
         Attacking?.Invoke(currentAttack.Duration);
 
-        yield return new WaitForSeconds(currentAttack.TimeBeforeTouch);
-
-        float distance = GetDistance();
-
-        if (distance <= _distanceToAttack)
-        {
-            _target.ApplyDamage(currentAttack.Damage);
-
-            if (_target.IsAlive == false)
-            {
-                TargetDied?.Invoke();
-            }
-        }
-
-        yield return new WaitForSeconds(currentAttack.Duration - currentAttack.TimeBeforeTouch);
+        yield return new WaitForSeconds(currentAttack.Duration);
 
         _isWaitingForNextAttack = true;
         _isAttacking = false;
         currentAttack.SetCompleteState(true);
 
         yield break;
-    }
-
-    private float GetDistance()
-    {
-        float distance = Vector3.Distance(transform.position, _target.transform.position);
-        return distance;
     }
 }
 
@@ -155,14 +152,12 @@ public class AttackType
     public bool IsCompleted { get; private set; } = false;
     public float Duration { get; private set; }
     public float TimeBeforeTouch { get; private set; }
-    public int Damage { get; private set; }
 
-    public AttackType(string triggerName, float duration, float timeBeforeTouch, int damage)
+    public AttackType(string triggerName, float duration, float timeBeforeTouch)
     {
         Triggername = triggerName;
         Duration = duration;
         TimeBeforeTouch = timeBeforeTouch;
-        Damage = damage;
     }
 
     public void SetCompleteState(bool isCompleted)

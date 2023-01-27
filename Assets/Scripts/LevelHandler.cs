@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -12,12 +11,14 @@ public class LevelHandler : MonoBehaviour
     [SerializeField] private GameObject _enemyPrefab;
 
     private Level _currentLevel;
-    private List<Level> _completeLevels;
     private int _aliveEnemiesCount;
-    private List<GameObject> _enemies;
+    //private List<Enemy> _enemies;
+    private float _coefficientTo3Stars = 1;
+    private float _coefficientTo2Stars = 0.66f;
+    private float _coefficientTo1Star = 0.33f;
     public List<Level> Levels => _levels;
 
-    public event UnityAction LevelComplete;
+    public event UnityAction<int> LevelComplete;
     private enum Stars
     { 
         BadResult = 0,
@@ -26,83 +27,67 @@ public class LevelHandler : MonoBehaviour
         GreatResult = 3
     }
 
-    private void OnEnable()
-    {
-        _player.TargetDied += CalculatAliveEnemies;
-    }
-
-    private void OnDisable()
-    {
-        _player.TargetDied -= CalculatAliveEnemies;
-    }
-
     public void SetLevel(int levelNumber)
-    {
+    {   
+        List<Enemy> enemies = new List<Enemy>();
         int levelIndex = levelNumber - 1;
         _forestSpawnController.SetDuration(_levels[levelIndex].RunnerPhazeDuration);
-        _enemies = _arena.SpawnEnemies(_enemyPrefab, _levels[levelIndex].EnemiesCount);
+        enemies = _arena.SpawnEnemies(_enemyPrefab, _levels[levelIndex].EnemiesCount);
+
+
+        foreach (var enemy in enemies)
+            enemy.EnemyDied += CalculateAliveEnemies;
+
         _currentLevel = _levels[levelIndex];
-        _aliveEnemiesCount = _enemies.Count;
+        _aliveEnemiesCount = enemies.Count;
     }
 
     public void Restart()
-    {
-        Clear();
+    {   
+        _arena.Clear();
+
         _forestSpawnController.SetDuration(_currentLevel.RunnerPhazeDuration);
-        _enemies = _arena.SpawnEnemies(_enemyPrefab, _currentLevel.EnemiesCount);
-        _aliveEnemiesCount = _enemies.Count;
+
+        _arena.SpawnEnemies(_enemyPrefab, _currentLevel.EnemiesCount);
+        _aliveEnemiesCount = _arena.EnemiesCount;
     }
 
     public void SetToMainMenu()
     {
-        Clear();
+        _arena.Clear();
         _currentLevel = null;
     }
 
-    public List<GameObject> GetEnemies()
-    {
-        return _enemies;
+    public List<Enemy> GetEnemies()
+    {   
+        return _arena.GetEnemies();
     }
 
-    private void Clear()
-    {
-        foreach (GameObject enemy in _enemies)
-            Destroy(enemy);
-
-        _enemies.Clear();
-    }
-
-    private void CalculatAliveEnemies()
-    {
+    private void CalculateAliveEnemies(Enemy enemy)
+    {   
+        enemy.EnemyDied -= CalculateAliveEnemies;
         _aliveEnemiesCount--;
 
         if (_aliveEnemiesCount == 0)
-        {
             CalculateResult();
-            LevelComplete?.Invoke(); 
-        }           
     }
     
     public void CalculateResult()
     {        
         float currentHealth = _player.GetComponent<PlayerHealth>().Health;
-        float maxHealth = _player.GetComponent<PlayerHealth>().MaxHealth;
-
-        float coefficientTo3Stars = 1;
-        float coefficientTo2Stars = 0.66f;
-        float coefficientTo1Star = 0.33f;
+        float maxHealth = _player.GetComponent<PlayerHealth>().MaxHealth;        
 
         int starsCount;
 
-        if (currentHealth / maxHealth == coefficientTo3Stars)
+        if (currentHealth / maxHealth == _coefficientTo3Stars)
         {
             starsCount = (int)Stars.GreatResult;
         }
-        else if(currentHealth / maxHealth > coefficientTo2Stars && currentHealth / maxHealth < 1)
+        else if(currentHealth / maxHealth > _coefficientTo2Stars && currentHealth / maxHealth < 1)
         {
             starsCount = (int)Stars.GoodResult;
         }
-        else if(currentHealth / maxHealth > coefficientTo1Star && currentHealth / maxHealth < coefficientTo2Stars)
+        else if(currentHealth / maxHealth > _coefficientTo1Star && currentHealth / maxHealth < _coefficientTo2Stars)
         {
             starsCount = (int)Stars.AverageResult;
         }
@@ -110,7 +95,7 @@ public class LevelHandler : MonoBehaviour
         {
             starsCount = (int)Stars.BadResult;
         }
-
+        LevelComplete?.Invoke(starsCount);
         _currentLevel.SetResult(starsCount);
     }
 
@@ -126,7 +111,6 @@ public class LevelHandler : MonoBehaviour
 }
 
 [System.Serializable]
-
 public class Level
 {
     [SerializeField] private float _runnerPhazeDuration;
@@ -140,10 +124,13 @@ public class Level
     public bool IsCompleted => _isCompleted;
     public int ResultInStars => _resultInStars;
 
-    public void SetResult(int result)
+    public void SetResult(int newResult)
     {
+        if (this._isCompleted && newResult < _resultInStars)
+            return;
+
         _isCompleted = true;
-        _resultInStars = result;
+        _resultInStars = newResult;
     }
 }
 

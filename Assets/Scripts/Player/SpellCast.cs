@@ -46,7 +46,7 @@ public class SpellCast : MonoBehaviour
     private void Cast()
     {   
         if(_player.TryGetMana(_manaCost))
-            StartCoroutine(CastSpell());
+            StartCoroutine(CastSpell()); 
     }
 
     private IEnumerator CastSpell()

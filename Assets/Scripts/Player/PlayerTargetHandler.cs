@@ -15,7 +15,8 @@ public class PlayerTargetHandler : MonoBehaviour
     private ActionAnimationController _actionAnimationController;
     private AttackHandler _attackHandler;
     private RollHandler _rollHandler;
-    private List<GameObject> _targets;
+    private List<Enemy> _targets;
+    
     private int _currentTargetIndex = 0;
 
     private void Awake()
@@ -26,58 +27,74 @@ public class PlayerTargetHandler : MonoBehaviour
         _attackHandler = GetComponent<AttackHandler>();
     }
 
-    private void OnEnable()
-    {
-        _attackHandler.TargetDied += SetNewTarget;
-    }
-
     private void OnDisable()
     {
-        _attackHandler.TargetDied -= SetNewTarget;
         _targets = null;
         _currentTargetIndex = 0;
     }
 
-    public void SetTargetsList(List<GameObject> enemyList)
+    public void SetTargetsList(List<Enemy> enemyList)
     {
         _targets = enemyList;
-        SetTarget();
+
+        foreach(var target in _targets)
+        {
+            target.EnemyDied += OnEnemyDied;
+        }
+        _targets[_currentTargetIndex].SetAsActiveTarget(true);
     }
 
     public void SetNewTarget()
     {
-        if (_currentTargetIndex == _targets.Count - 1)
+        if (_targets.Count <= 0)
+            return;
+
+        if(_currentTargetIndex >= _targets.Count)
         {
-            for (int i = 0; i < _targets.Count; i++)
-            {
-                if (_targets[i].GetComponent<Enemy>().IsAlive && _targets[i] != null)
-                {
-                    _currentTargetIndex = i;
-                    SetTarget();
-                    break;
-                }
-            }
+            _currentTargetIndex = 0;
+            _targets[_currentTargetIndex].SetAsActiveTarget(true);
             return;
         }
+        
+        _targets[_currentTargetIndex].SetAsActiveTarget(false); //мне нужно что бы после смерти его выключало?
+        _currentTargetIndex++;
 
-        for (int i = 0; i < _targets.Count; i++)
-        {
-            if (i > _currentTargetIndex && _targets[i].GetComponent<Enemy>().IsAlive)
-            {
-                _currentTargetIndex = i;
-                break;
-            }
-        }
-        SetTarget();
+        if (_currentTargetIndex == _targets.Count)
+            _currentTargetIndex = 0;
+
+        _targets[_currentTargetIndex].SetAsActiveTarget(true);
     }
 
-    private void SetTarget()
+    public void SetTarget(Enemy enemy)
+    {       
+        _camera.SetTarget(enemy.transform);
+        _actionAnimationController.SetTarget(enemy.transform);
+        _attackHandler.SetTarget(enemy.GetComponent<EnemyHealth>());
+        _rollHandler.SetTarget(enemy.transform);
+        _spell.SetTarget(enemy.transform);
+
+        if(enemy != _targets[_currentTargetIndex])
+        {
+            _targets[_currentTargetIndex].SetAsActiveTarget(false);
+
+            for (int i = 0; i < _targets.Count; i++)
+            {
+                if (_targets[i] == enemy)
+                {
+                    _currentTargetIndex = i;
+                }
+            }
+        }   
+    }
+
+    private void OnEnemyDied(Enemy enemy)
     {
-        _camera.SetTarget(_targets[_currentTargetIndex].transform);
-        _actionAnimationController.SetTarget(_targets[_currentTargetIndex].transform);
-        _attackHandler.SetTarget(_targets[_currentTargetIndex].GetComponent<Enemy>());
-        _rollHandler.SetTarget(_targets[_currentTargetIndex].transform);
-        _spell.SetTarget(_targets[_currentTargetIndex].transform);
+        _targets.Remove(enemy);
+
+        if (enemy.IsActiveTarget)
+            SetNewTarget();
+
+        enemy.EnemyDied -= OnEnemyDied;
     }
 }
     

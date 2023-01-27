@@ -70,7 +70,7 @@ public class ForestSpawnController : ObjectPool
 
     public void SetDuration(float duration)
     {
-        //StartCoroutine(SetTimer(duration));
+        StartCoroutine(SetTimer(duration));
     }
     
     private void SetForest(GameObject forest)

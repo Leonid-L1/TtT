@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -68,6 +67,7 @@ public class Player : MonoBehaviour
         _animationController.Restart();
         _healthHandler.ResetHealth();
         _collectibles.ResetMana();
+        _collectibles.ResetCoins();
     }
 
     public void SetToMainMenu()
@@ -77,9 +77,10 @@ public class Player : MonoBehaviour
         SetRunnerControllersOff();
         SetActionControllersOff();
         _collectibles.ResetMana();
+        _collectibles.ResetCoins();
     }
 
-    public void SetToActionPhaze(List<GameObject> enemyList)
+    public void SetToActionPhaze(List<Enemy> enemyList)
     {
         GetComponentInChildren<CapsuleCollider>().isTrigger = false;
         _targetHandler.SetTargetsList(enemyList);          

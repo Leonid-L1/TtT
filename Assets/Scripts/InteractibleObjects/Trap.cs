@@ -8,14 +8,11 @@ public class Trap : InteractableObject
     private float _animationSpeed = 10;
     private float _animationPositionY = -0.2f;
 
-    private void OnTriggerEnter(Collider collider)
+    protected override void InteractWithPlayer(PlayerCollider playerCollider)
     {
-        if(collider.TryGetComponent(out PlayerCollider playerCollider))
-        {
-            collider.gameObject.GetComponentInParent<PlayerHealth>().ApplyDamage(_damage);
-            StartCoroutine(DoAnimation());
-        }
-    }    
+        playerCollider.gameObject.GetComponentInParent<PlayerHealth>().ApplyDamage(_damage);
+        StartCoroutine(DoAnimation());
+    }
 
     private IEnumerator DoAnimation()
     {

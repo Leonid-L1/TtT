@@ -16,7 +16,7 @@ public class Panel : MonoBehaviour
     //    _animator = GetComponent<Animator>();
     //}
 
-    public void MoveToScreen()
+    public virtual void MoveToScreen()
     {
         GetComponent<Animator>().Play(ToScreen);
         //_animator.Play(ToScreen);

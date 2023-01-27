@@ -1,91 +1,91 @@
 using UnityEngine;
 using UnityEngine.Events;
 
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(StateMachine))]
+[RequireComponent(typeof(Animator))]
+
 public class Enemy : MonoBehaviour
 {
     private static string DeathTrigger = "Death";
 
-    //[SerializeField] private float _deathAnimationDuration = 2.4f;
+    [SerializeField] private GameObject _pointer;
+    [SerializeField] private GameObject _setAsTargetButton;
 
+    private Rigidbody _rigidbody;
     private Collider _collider;
     private StateMachine _stateMachine;
-    private Stun _stunHandler;
     private Animator _animator;
 
-    //private float _timeBeforeDestroy = 2;
     private int _health = 100;
     private Player _target;
-    private bool _isAlive = true;
+    private bool _isActiveTarget;
 
-    public bool IsAlive => _isAlive;
+    public UnityAction<Enemy> EnemyDied;
     public int Health => _health;
     public Player Target => _target;
+    public bool IsActiveTarget => _isActiveTarget;
 
     private void Awake()
     {   
+        _rigidbody = GetComponent<Rigidbody>();
         _collider = GetComponentInChildren<CapsuleCollider>();
         _animator = GetComponent<Animator>();   
-        _stunHandler = GetComponent<Stun>();
         _stateMachine = GetComponent<StateMachine>();
-    }
-
-    private void OnEnable()
-    {
-        _stunHandler.StunEnded += TurnOnStateMachine;       
     }
 
     private void OnDisable()
     {
-        _stunHandler.StunEnded -= TurnOnStateMachine;
-
-        if(Target != null)
-            _target.DeadOnActionPhaze -= OnPlayerDead;
+        if (Target != null)
+            _target.DeadOnActionPhaze -= OnPlayerDied;
     }
 
     public void SetTarget(Player target)
     {
         _target = target;
-        _target.DeadOnActionPhaze += OnPlayerDead;
         _stateMachine.SetTarget(target);
-        TurnOnStateMachine();
+        _stateMachine.enabled = true;
+        _target.DeadOnActionPhaze += OnPlayerDied;
     }
 
-    public void ApplyDamage(int damage)
-    {   
-        if (_isAlive == false)
-            return;
+    public void SetAsActiveTarget(bool isActiveTarget)
+    {
+        _pointer.SetActive(isActiveTarget);
+        _isActiveTarget = isActiveTarget;
 
-        _health -= damage;
-
-        if (_health <= 0)
+        if (isActiveTarget)
         {
-            Die();
+            _target.GetComponent<PlayerTargetHandler>().SetTarget(this);
+            _setAsTargetButton.SetActive(false);
         }
         else
         {
-            _stunHandler.SetStun();
-            _stateMachine.enabled = false;
-        }       
+            _setAsTargetButton.SetActive(true);
+        }
     }
 
-    private void TurnOnStateMachine()
-    {
-        _stateMachine.enabled = true;
-    }  
-
-    private void Die() 
+    public void Die() 
     {   
-        _isAlive = false;
         _stateMachine.enabled = false;
+        _pointer.SetActive(false);
         StopAllCoroutines();
+        _animator.applyRootMotion = false;
         _animator.SetTrigger(DeathTrigger);
         _collider.enabled = false;
-        //Destroy(gameObject, _deathAnimationDuration + _timeBeforeDestroy);
+        _rigidbody.velocity = Vector3.zero;
+        _rigidbody.isKinematic = true;
+        EnemyDied?.Invoke(this);
     }
 
-    private void OnPlayerDead()
+    private void OnPlayerDied()
     {
-        Destroy(gameObject);
+        StopAllCoroutines();
+        _pointer.SetActive(false);
+        _stateMachine.enabled = false;
+        _animator.applyRootMotion = false;
+        _collider.enabled = false;
+        _rigidbody.velocity = Vector3.zero;
+        _rigidbody.isKinematic = true;
     }
 }
 

@@ -1,20 +1,16 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
 [RequireComponent(typeof(Slider))]
 
 public class Bar : MonoBehaviour
 {
     [SerializeField] private bool _startValueIsMaxValue;
+    [SerializeField] private float _changeStep = 0.4f;
+    [SerializeField] private Slider _slider;
 
-    private float _changeStep = 0.4f;
-    private Slider _slider;
-
-    private void Start()
-    {
-        _slider = GetComponent<Slider>();
-    }
+    public float Value => _slider.value;
 
     public void SetMaxValue(int newMaxValue)
     {

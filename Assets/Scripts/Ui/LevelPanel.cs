@@ -1,8 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Events;
 using TMPro;
 
 [RequireComponent(typeof(Animator))]
@@ -18,8 +16,6 @@ public class LevelPanel : Panel
     [SerializeField] private List<Image> _stars;
     [SerializeField] private Sprite _emptyStar;
     [SerializeField] private Sprite _filledStar;
-
-    //public UnityAction LevelChosen;
 
     private int _currentLevelResult;
     private int _currentLevel = 1;
@@ -62,7 +58,6 @@ public class LevelPanel : Panel
 
     private void OnLevelButtonClick()
     {
-        //LevelChosen?.Invoke();
         MoveFromScreen();
         _levelHandler.SetLevel(_currentLevel);
     }
@@ -84,6 +79,4 @@ public class LevelPanel : Panel
             SetInfo();
         }
     }
-
-    
 }

@@ -1,14 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
 [RequireComponent(typeof(Player))]
 public class PlayerHealth : MonoBehaviour
 {
+    [SerializeField] private AudioSource _hitSound;   
+    
     private Player _player;
     private int _health;
     private int _maxHealth = 100;
+    private float minPitchValue = 0.9f;
+    private float maxPitchvalue = 1.1f;
 
     public int Health => _health;
     public int MaxHealth => _maxHealth;
@@ -33,11 +35,13 @@ public class PlayerHealth : MonoBehaviour
             _health -= damage;
         }
         HealthChanged?.Invoke(_health);
+        _hitSound.pitch = Random.Range(minPitchValue, maxPitchvalue);      
+        _hitSound.Play();
     }
 
     public void ResetHealth()
     {
         _health = _maxHealth;
-        HealthChanged?.Invoke(_health);
+        HealthChanged?.Invoke(_maxHealth);
     }
 }

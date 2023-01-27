@@ -1,8 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Events;
 
 [RequireComponent(typeof(Animator))]
 
@@ -17,13 +13,15 @@ public class InGamePanel : Panel
 
     private void Awake()
     {   
-        //_player.gameObject.GetComponent<PlayerHealth>();
-        //_player.gameObject.GetComponent<PlayerCollectibles>();
         _playerHealth = _player.GetComponent<PlayerHealth>();
         _playerMana = _player.GetComponent<PlayerCollectibles>();
     }
     private void OnEnable() 
     {
+        _healthBar.SetMaxValue(_playerHealth.MaxHealth);
+        _manaBar.SetMaxValue(_playerMana.MaxMana);
+        _healthBar.ChangeValue(_playerHealth.MaxHealth);
+
         _playerHealth.HealthChanged += OnHealthChanged;
         _playerMana.ManaCountChanged += OnManaChanged;
     }
@@ -34,10 +32,9 @@ public class InGamePanel : Panel
         _playerMana.ManaCountChanged -= OnManaChanged;
     }
 
-    private void Start()
+    public void DisablePanel()
     {
-        _healthBar.SetMaxValue(_playerHealth.MaxHealth);
-        _manaBar.SetMaxValue(_playerMana.MaxMana);
+        gameObject.SetActive(false);
     }
 
     private void OnHealthChanged(int targetValue)

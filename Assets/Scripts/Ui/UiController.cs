@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Events;
 
 public class UiController : MonoBehaviour
 {
@@ -13,11 +10,10 @@ public class UiController : MonoBehaviour
     [SerializeField] private InGamePanel _inGamePanel;
     [SerializeField] private PausePanel _pausePanel;
     [SerializeField] private Panel _actionPanel;
-    [SerializeField] private Panel _losePanel;
+    [SerializeField] private LosePanel _losePanel;
     [SerializeField] private LevelCompletePanel _levelCompletePanel;
     [SerializeField] private LevelPanel _levelPanel;
     [SerializeField] private Player _player;
-    public UnityAction LevelRestarted;
 
     private void OnEnable()
     {
@@ -58,24 +54,24 @@ public class UiController : MonoBehaviour
     
     public void Restart()
     {
-        if (!_inGamePanel.IsOnScreen)
-            _inGamePanel.MoveToScreen();
+        _inGamePanel.gameObject.SetActive(true);
+        _inGamePanel.MoveToScreen();
 
         if (_actionPanel.IsOnScreen)
             _actionPanel.MoveFromScreen();
     }
 
-    public void OnLevelComplete()
+    public void OnLevelComplete(int newResult)
     {
         if (_inGamePanel.IsOnScreen)
-            _inGamePanel.MoveFromScreen();
+            _inGamePanel.MoveFromScreen(); 
 
         if (_actionPanel.IsOnScreen)
             _actionPanel.MoveFromScreen();
 
         _levelCompletePanel.gameObject.SetActive(true);
         _levelCompletePanel.MoveToScreen();
-        _levelCompletePanel.SetStars();
+        _levelCompletePanel.SetStars(newResult);
         _levelPanel.SetInfo();
     }
 

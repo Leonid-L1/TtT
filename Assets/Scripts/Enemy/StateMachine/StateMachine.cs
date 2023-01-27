@@ -3,11 +3,11 @@ using UnityEngine;
 public class StateMachine : MonoBehaviour
 {
     [SerializeField] private State _firstState;
+    [SerializeField] private StunState _stunState;
 
     private Player _target;
     private State _currentState;
 
-    //public State CurrentState => _currentState;
 
     private void OnEnable()
     {
@@ -21,10 +21,9 @@ public class StateMachine : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if( _currentState == null)
-        {
+        if( _currentState == null || _stunState.IsStunned)
             return;
-        }
+
         State nextState = _currentState.TryGetNextState();
 
         if (nextState != null)

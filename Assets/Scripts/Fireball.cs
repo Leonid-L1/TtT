@@ -6,7 +6,7 @@ public class Fireball : MonoBehaviour
     private bool _isTargetSet = false;
     private Transform _target;
     private float _speed = 10;
-    private int _damage = 1;
+    private int _damage = 100;
     private float _offsetY = 1.5f;
 
     private void Update()
@@ -22,8 +22,8 @@ public class Fireball : MonoBehaviour
     {
         if (collider.TryGetComponent(out EnemyCollider enemyCollider))
         {
-            enemyCollider.GetComponentInParent<Enemy>().ApplyDamage(_damage);
             Destroy(gameObject);
+            enemyCollider.GetComponentInParent<EnemyHealth>().ApplyDamage(_damage);
         }
     }
 

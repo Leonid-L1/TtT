@@ -2,25 +2,33 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+[RequireComponent(typeof(PlayerWeapon))]
 
 public class PlayerCollectibles : MonoBehaviour
 {
-    public event UnityAction<int> ManaCountChanged;
-    //public event UnityAction<int> CoinsCountChanged;
+    public event UnityAction<int> ManaCountChanged;    
+    public event UnityAction CurrentLevelCoinsChanged;
 
     private int _mana;
-    private int _coinsCount;
+    private int _currentLevelCoinsCount = 0;
+    private int _allCoins;
     private int _maxMana = 100;
+
+    private PlayerWeapon _weaponHandler;
     public int MaxMana => _maxMana;
- 
+    public int CurrentLevelCoinsCount => _currentLevelCoinsCount;
+    public int AllCoins => _allCoins;
+
     private void Start()
     {
         _mana = 0;
+        _weaponHandler = GetComponent<PlayerWeapon>();
     }
 
     public void IncreaseCoinsCount()
     {
-        _coinsCount++;
+        _currentLevelCoinsCount++;
+        CurrentLevelCoinsChanged?.Invoke();
     }
 
     public void IncreaseMana(int mana)
@@ -44,8 +52,13 @@ public class PlayerCollectibles : MonoBehaviour
 
     public void ResetCoins()
     {
-        _coinsCount = 0;
-        //CoinsCountChanged?.Invoke(_mana);
+        _currentLevelCoinsCount = 0;
+        CurrentLevelCoinsChanged?.Invoke();
+    }
+
+    public void AddCompleteLevelCoins()
+    {
+        _allCoins += _currentLevelCoinsCount;
     }
 
     public bool TryGetMana(int manaCost)
@@ -54,6 +67,20 @@ public class PlayerCollectibles : MonoBehaviour
         {
             _mana -= manaCost;
             ManaCountChanged?.Invoke(_mana);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public bool TryBuyWeapon(Weapon weapon)
+    {
+        if(weapon.Price <= _allCoins)
+        {
+            _allCoins -= weapon.Price;
+            _weaponHandler.SetNewWeapon(weapon);
             return true;
         }
         else

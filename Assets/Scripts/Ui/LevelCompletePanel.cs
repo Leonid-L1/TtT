@@ -5,8 +5,7 @@ using UnityEngine.UI;
 
 public class LevelCompletePanel : Panel
 {
-    private const string _starsScalingAnimation = "";
-
+    [SerializeField] private AudioSource _winSound;
     [SerializeField] private LevelHandler _levelHandler;
     [SerializeField] private List<Button> _buttons;
     [SerializeField] private List<Animation> _stars;
@@ -18,23 +17,27 @@ public class LevelCompletePanel : Panel
     private void OnEnable()
     {
         foreach (Button button in _buttons)
-            button.interactable = false;
+            button.interactable = false;      
     }
 
+    public override void MoveToScreen()
+    {
+        base.MoveToScreen();
+        _winSound.Play();
+    }
     public override void MoveFromScreen()
     {
-        base.MoveFromScreen();
+        base.MoveFromScreen();     
         StartCoroutine(DisablePanel());
     }
 
-    public void SetStars()
+    public void SetStars(int stasrCount)
     {
-        StartCoroutine(AnimateStars());
+        StartCoroutine(AnimateStars(stasrCount));
     }
 
-    private IEnumerator AnimateStars()
-    {
-        int starsCount = _levelHandler.GetResult();        
+    private IEnumerator AnimateStars(int starsCount)
+    {             
         yield return new WaitForSeconds(_moveToScreenDuration);
 
         for (int i = 0; i < starsCount; i++)
@@ -52,6 +55,13 @@ public class LevelCompletePanel : Panel
     {
         yield return new WaitForSecondsRealtime(_timeBeforeDisable);
 
+        foreach (var star in _stars)
+        {
+            star.Rewind();
+            star.Play();
+            star.Sample();
+            star.Stop();
+        }
         gameObject.SetActive(false);
         yield break;
     }

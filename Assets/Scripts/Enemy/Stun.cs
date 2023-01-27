@@ -8,6 +8,7 @@ public class Stun : MonoBehaviour
 
     private Animator _animator;
     private Rigidbody _rigidbody;
+    private StateMachine _stateMachine;
 
     private const string StunTrigger = "Hit";
     private Coroutine _stun;
@@ -16,6 +17,7 @@ public class Stun : MonoBehaviour
 
     private void Start()
     {   
+        _stateMachine = GetComponent<StateMachine>();
         _rigidbody = GetComponent<Rigidbody>();
         _animator = GetComponent<Animator>();
     }
@@ -48,12 +50,12 @@ public class Stun : MonoBehaviour
     {
         _animator.SetTrigger(StunTrigger);
         _animator.applyRootMotion = true;
-
+        _stateMachine.enabled = false;
         yield return new WaitForSeconds(stunDuration);
 
         _animator.applyRootMotion = false;
         StunEnded?.Invoke();
-
+        _stateMachine.enabled = true;
         yield break;
     }
 }
