@@ -110,6 +110,11 @@ public class LevelHandler : MonoBehaviour
     {
         return _currentLevel.ResultInStars;
     }
+
+    //public Level GetSavingLevelData()
+    //{
+
+    //}
 }
 
 [System.Serializable]
@@ -117,7 +122,7 @@ public class Level
 {
     [SerializeField] private float _runnerPhazeDuration;
     [SerializeField] private int _enemiesCount;
-
+ 
     private bool _isCompleted;
     private int _resultInStars = 0;
 
