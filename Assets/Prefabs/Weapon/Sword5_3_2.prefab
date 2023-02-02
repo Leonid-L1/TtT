@@ -96,6 +96,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3490958f0abccd4498844f7313aad59b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _name: Bone Sword
   _icon: {fileID: 21300000, guid: 92f994a14699bb24da36a384a866fdfd, type: 3}
   _damage: 100
   _price: 4

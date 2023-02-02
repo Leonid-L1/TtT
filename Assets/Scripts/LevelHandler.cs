@@ -9,7 +9,7 @@ public class LevelHandler : MonoBehaviour
     [SerializeField] private Arena _arena;
     [SerializeField] private AttackHandler _player;
     [SerializeField] private GameObject _enemyPrefab;
-
+    
     private Level _currentLevel;
     private int _aliveEnemiesCount;
     private float _coefficientTo3Stars = 1;
@@ -97,8 +97,8 @@ public class LevelHandler : MonoBehaviour
         {
             starsCount = (int)Stars.BadResult;
         }
-        LevelComplete?.Invoke(starsCount);
         _currentLevel.SetResult(starsCount);
+        LevelComplete?.Invoke(starsCount);
     }
 
     public int GetResult(int levelIndex)
@@ -111,10 +111,27 @@ public class LevelHandler : MonoBehaviour
         return _currentLevel.ResultInStars;
     }
 
-    //public Level GetSavingLevelData()
-    //{
+    public List<int> GetLevelsResultToSave()
+    {   
+        List<int> levelsToSave = new List<int>();
 
-    //}
+        for (int i = 0; i < _levels.Count; i++)
+        {
+            if (_levels[i].IsCompleted == false)
+                break;
+
+            levelsToSave.Add(_levels[i].ResultInStars);
+        }
+        return levelsToSave;
+    }
+    
+    public void LoadSavingData(List<int> savedLevels)
+    {
+        for (int i = 0; i < savedLevels.Count; i++)
+        {
+            _levels[i].SetResult(savedLevels[i]);
+        }
+    }
 }
 
 [System.Serializable]

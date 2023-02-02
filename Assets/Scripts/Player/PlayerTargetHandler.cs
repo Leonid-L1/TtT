@@ -97,8 +97,6 @@ public class PlayerTargetHandler : MonoBehaviour
             SetNewTarget();
 
         enemy.EnemyDied -= OnEnemyDied;
-
-
     }
 }
     

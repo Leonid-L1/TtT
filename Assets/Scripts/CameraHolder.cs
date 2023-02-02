@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraHolder : MonoBehaviour
@@ -16,7 +14,6 @@ public class CameraHolder : MonoBehaviour
     private Vector3 _newPosition;
     private Quaternion _newRotation;
     public Vector3 StartPosition { get; private set; } = new Vector3(0,3, -30);
-    
 
     private void LateUpdate()
     {

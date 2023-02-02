@@ -11,6 +11,7 @@ public class GameController : MonoBehaviour
     [SerializeField] private Player _player;
     [SerializeField] private ArenaSecondTrigger _trigger;
     [SerializeField] private BackgroundMusicHandler _musicHandler;
+    [SerializeField] private SaveSystem _saver;
 
     private LevelHandler _levelHandler;
     private void Awake()
@@ -97,6 +98,7 @@ public class GameController : MonoBehaviour
         _uiController.OnLevelComplete(newResult);
         _player.GetComponent<PlayerCollectibles>().AddCompleteLevelCoins();
         _musicHandler.StopMusic();
+        _saver.Save();
     }
 
     private void DeathOnRunnerPhaze()

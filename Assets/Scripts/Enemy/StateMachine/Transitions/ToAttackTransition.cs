@@ -9,8 +9,6 @@ public class ToAttackTransition : Transition
         float distance = Vector3.Distance(transform.position, Target.transform.position);
 
         if(distance < _attackDistance)
-        {
             IsReadyToTransit = true;
-        }
     }
 }

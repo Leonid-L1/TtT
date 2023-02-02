@@ -30,17 +30,17 @@ public class MoveState : State
     }
 
     private void FixedUpdate()
-    {   
-        if (Target != null)
-        {   
-            Vector3 targetPosition = new Vector3(Target.transform.position.x, transform.position.y, Target.transform.position.z);
+    {
+        if (Target == null)
+            return;
 
-            Quaternion lookRotation = Quaternion.LookRotation(targetPosition - transform.position);
-            _rigidbody.rotation = Quaternion.Lerp(_rigidbody.rotation, lookRotation, _rotationSpeed * Time.deltaTime);
+        Vector3 targetPosition = new Vector3(Target.transform.position.x, transform.position.y, Target.transform.position.z);
 
-            Vector3 velocity = transform.forward * _speed;
-            _rigidbody.velocity = Vector3.MoveTowards(_rigidbody.velocity, velocity, _interpolateSpeed * Time.deltaTime);
-        }     
+        Quaternion lookRotation = Quaternion.LookRotation(targetPosition - transform.position);
+        _rigidbody.rotation = Quaternion.Lerp(_rigidbody.rotation, lookRotation, _rotationSpeed * Time.deltaTime);
+
+        Vector3 velocity = transform.forward * _speed;
+        _rigidbody.velocity = Vector3.MoveTowards(_rigidbody.velocity, velocity, _interpolateSpeed * Time.deltaTime);
     }
 }
 

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -34,6 +33,7 @@ public class InteractableSpawner : ObjectPool
     private void Update()
     {
         SetMoveCondition();
+
         if (!_isSpawnRequired)
             return;
 

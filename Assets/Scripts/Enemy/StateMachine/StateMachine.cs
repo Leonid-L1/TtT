@@ -8,7 +8,6 @@ public class StateMachine : MonoBehaviour
     private Player _target;
     private State _currentState;
 
-
     private void OnEnable()
     {
         Reset(_firstState);

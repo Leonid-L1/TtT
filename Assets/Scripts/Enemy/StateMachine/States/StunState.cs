@@ -1,26 +1,17 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class StunState : State
 {
     [SerializeField] private float stunDuration = 0.6f;
-
     [SerializeField] private Animator _animator;
     [SerializeField] private Rigidbody _rigidbody;
 
     private const string StunTrigger = "Hit";
     private Coroutine _stunCoroutine;
-
     private bool _isStunned;
 
     public bool IsStunned => _isStunned;
-
-    private void Start()
-    {
-        //_rigidbody = GetComponent<Rigidbody>();
-        //_animator = GetComponent<Animator>();
-    }
 
     private void OnEnable()
     {

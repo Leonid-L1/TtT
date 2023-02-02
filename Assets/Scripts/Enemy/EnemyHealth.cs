@@ -28,9 +28,7 @@ public class EnemyHealth : MonoBehaviour
             return;
 
         if (_healthBar.Value <= 0)
-        {
             _healthBar.gameObject.SetActive(false);
-        }
     }
 
     public void ApplyDamage(int damage)
@@ -46,7 +44,6 @@ public class EnemyHealth : MonoBehaviour
             _toStunTransition.SetAsReady();
         }
         _healthBar.gameObject.SetActive(true);
-
         _hitSound.pitch = Random.Range(minPitchValue, maxPitchvalue);
         _hitSound.Play();
         _healthBar.ChangeValue(_health);

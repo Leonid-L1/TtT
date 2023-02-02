@@ -9,6 +9,7 @@ public class CoinsDisplay : MonoBehaviour
 
     private void OnEnable()
     {
+        DisplayCurrentLevelCoins();
         _playerCoins.CurrentLevelCoinsChanged += DisplayCurrentLevelCoins;
     }
 
@@ -21,9 +22,4 @@ public class CoinsDisplay : MonoBehaviour
     {
         _coins.text = _playerCoins.CurrentLevelCoinsCount.ToString();
     }
-
-    //public void DisplayAllCoins()
-    //{
-    //    _coins.text = _playerCoins.AllCoins.ToString();
-    //}
 }

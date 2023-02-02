@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -64,7 +63,7 @@ public class RollHandler : MonoBehaviour
     {
         _isRolling = true;
         _rollButton.interactable = false;
-        SetRollDirection();
+        SetDirection();
         _rigidbody.rotation = _rotation.rotation;
         Rolling?.Invoke(_rollAnimationDuration);
         _animator.SetTrigger(RollTrigger);
@@ -80,7 +79,7 @@ public class RollHandler : MonoBehaviour
         yield break;
     }
 
-    private void SetRollDirection()
+    private void SetDirection()
     {
         Vector3 enemyToPlayer = _enemy.position - transform.position;
         Vector3 directionFromTarget = enemyToPlayer.normalized;

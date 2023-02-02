@@ -34,7 +34,6 @@ public class PlayerHealth : MonoBehaviour
         {
             _health -= damage;
         }
-        Debug.Log(_health);
         HealthChanged?.Invoke(_health);
         _hitSound.pitch = Random.Range(minPitchValue, maxPitchvalue);      
         _hitSound.Play();

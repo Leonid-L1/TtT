@@ -12,7 +12,7 @@ abstract public class InteractableObject : MonoBehaviour
     private void Update()
     {   
         if(_isMoving)
-        transform.Translate(_direction * (_speed * Time.deltaTime));
+            transform.Translate(_direction * (_speed * Time.deltaTime));
 
         if (transform.position.z <= _edgePosition)        
             gameObject.SetActive(false);       
@@ -23,10 +23,8 @@ abstract public class InteractableObject : MonoBehaviour
         if (other.TryGetComponent(out PlayerCollider playerCollider))
         {   
             if(OnInteractSound != null)
-            {
                 OnInteractSound.Play();
-            }      
-            
+
             InteractWithPlayer(playerCollider);
         }
     }

@@ -13,10 +13,11 @@ public class UiController : MonoBehaviour
     [SerializeField] private LosePanel _losePanel;
     [SerializeField] private LevelCompletePanel _levelCompletePanel;
     [SerializeField] private LevelPanel _levelPanel;
-    [SerializeField] private Player _player;
+    [SerializeField] private PlayerAnimationController _player;
 
     private void OnEnable()
     {
+        _player.MovedToRunPosition += OnPlayerMovedToRunPosition;
         _camera.MovedToActionPosition += _actionPanel.MoveToScreen;
         _camera.MovedToMainMenu += OnCameraSetToMainMenu;
         _logoButton?.onClick.AddListener(OnLogoButtonClick);
@@ -24,9 +25,10 @@ public class UiController : MonoBehaviour
 
     private void OnDisable()
     {
-        _logoButton?.onClick.RemoveListener(OnLogoButtonClick);
-        _camera.MovedToMainMenu -= OnCameraSetToMainMenu;
+        _player.MovedToRunPosition -= OnPlayerMovedToRunPosition;
         _camera.MovedToActionPosition -= _actionPanel.MoveToScreen; 
+        _camera.MovedToMainMenu -= OnCameraSetToMainMenu;
+        _logoButton?.onClick.RemoveListener(OnLogoButtonClick);
     }
 
     public void SetMainMenu()
@@ -41,8 +43,7 @@ public class UiController : MonoBehaviour
     public void StartLevel()
     {
         _camera.MoveToRunnerPosition();
-        _inGamePanel.gameObject.SetActive(true);
-        _inGamePanel.MoveToScreen();
+             
         _mainMenu.HideElements();
     }
 
@@ -54,8 +55,7 @@ public class UiController : MonoBehaviour
     
     public void Restart()
     {
-        _inGamePanel.gameObject.SetActive(true);
-        _inGamePanel.MoveToScreen();
+        _inGamePanel.gameObject.SetActive(false);
 
         if (_actionPanel.IsOnScreen)
             _actionPanel.MoveFromScreen();
@@ -75,6 +75,11 @@ public class UiController : MonoBehaviour
         _levelPanel.SetInfo();
     }
 
+    private void OnPlayerMovedToRunPosition()
+    {
+        _inGamePanel.gameObject.SetActive(true);
+        _inGamePanel.MoveToScreen();
+    }
     private void OnCameraSetToMainMenu()
     {
         if (!_mainMenu.IsButtonsOnScreen)

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 [RequireComponent(typeof(PlayerWeapon))]
@@ -23,6 +21,11 @@ public class PlayerCollectibles : MonoBehaviour
     {
         _mana = 0;
         _weaponHandler = GetComponent<PlayerWeapon>();
+    }
+
+    public void Load(int coinsCount)
+    {
+        _allCoins = coinsCount;
     }
 
     public void IncreaseCoinsCount()
