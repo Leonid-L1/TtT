@@ -73,7 +73,7 @@ public class LevelPanel : Panel
 
     private void OnRightArrowClick()
     {
-        if (_levelHandler.Levels[_currentLevel - 1].IsCompleted)
+        if (_currentLevel!=_levelHandler.Levels.Count && _levelHandler.Levels[_currentLevel - 1].IsCompleted)
         {
             _currentLevel++;
             SetInfo();

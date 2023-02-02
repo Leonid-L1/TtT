@@ -1,1 +1,7 @@
-{"$type":"SaveFile, Assembly-CSharp","SoldWeaponNames":null,"LevelsResult":{"$type":"System.Collections.Generic.List`1[[System.Int32, mscorlib]], mscorlib","$values":[3,3,2]},"Coins":212}
+{
+  "$type": "SaveFile, Assembly-CSharp",
+  "SoldWeaponNames": null,
+  "LevelsResult": {
+    "$type": "System.Collections.Generic.List`1[[System.Int32, mscorlib]], mscorlib",
+    "$values": [ 3, 3, 2, 3, 3 ]
+  },"Coins":212}

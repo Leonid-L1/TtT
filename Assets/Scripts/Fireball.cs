@@ -5,7 +5,7 @@ public class Fireball : MonoBehaviour
     private bool _isTargetSet = false;
     private Transform _target;
     private float _speed = 10;
-    private int _damage = 100;
+    private int _damage = 40;
     private float _offsetY = 1.5f;
 
     private void Update()

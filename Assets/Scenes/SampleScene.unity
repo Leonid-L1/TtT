@@ -16271,14 +16271,14 @@ MonoBehaviour:
   _levels:
   - _runnerPhazeDuration: 1
     _enemiesCount: 1
-  - _runnerPhazeDuration: 3
-    _enemiesCount: 1
-  - _runnerPhazeDuration: 10
+  - _runnerPhazeDuration: 15
     _enemiesCount: 2
-  - _runnerPhazeDuration: 20
-    _enemiesCount: 2
-  - _runnerPhazeDuration: 20
-    _enemiesCount: 2
+  - _runnerPhazeDuration: 30
+    _enemiesCount: 3
+  - _runnerPhazeDuration: 45
+    _enemiesCount: 4
+  - _runnerPhazeDuration: 60
+    _enemiesCount: 5
   _forestSpawnController: {fileID: 16506318}
   _arena: {fileID: 912978836919308320}
   _player: {fileID: 1574377043}
